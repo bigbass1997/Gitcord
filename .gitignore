@@ -1,0 +1,7 @@
+bin/
+build/
+bot-config/
+.gradle/
+.settings/
+.project
+.classpath
