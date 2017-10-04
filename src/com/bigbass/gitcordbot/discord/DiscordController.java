@@ -3,6 +3,7 @@ package com.bigbass.gitcordbot.discord;
 import com.bigbass.gitcordbot.config.ConfigManager;
 import com.bigbass.gitcordbot.discord.commands.AddPermCommand;
 import com.bigbass.gitcordbot.discord.commands.CommandHandler;
+import com.bigbass.gitcordbot.discord.commands.RegisterUpdateCommand;
 import com.bigbass.gitcordbot.discord.commands.RemovePermCommand;
 import com.bigbass.gitcordbot.discord.commands.TestCommand;
 import com.bigbass.gitcordbot.discord.listeners.ReadyListener;
@@ -37,6 +38,7 @@ public class DiscordController {
 		ch.registerCommand(new TestCommand());
 		ch.registerCommand(new AddPermCommand());
 		ch.registerCommand(new RemovePermCommand());
+		ch.registerCommand(new RegisterUpdateCommand());
 	}
 	
 	public static DiscordController getInstance(){

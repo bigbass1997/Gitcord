@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 import com.bigbass.gitcordbot.config.ConfigManager;
 import com.bigbass.gitcordbot.discord.DiscordController;
-import com.bigbass.gitcordbot.github.GithubController;
 
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RateLimitException;
@@ -62,10 +61,6 @@ public class ConsoleCommandListener extends Thread {
 			
 			if(responce.startsWith("set status")){
 				DiscordController.getInstance().client.changePlayingText(responce.substring("set status".length()));
-			}
-			
-			if(responce.equalsIgnoreCase("doagain")){
-				GithubController.getInstance().doAgain();
 			}
 		}
 		

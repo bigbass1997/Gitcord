@@ -1,5 +1,6 @@
 package com.bigbass.gitcordbot.config;
 
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.json.Json;
@@ -14,6 +15,10 @@ public class ConfigManager {
 	private Hashtable<String, Config> configs;
 	
 	private ConfigManager(){
+		if(!new File(CONFIG_DIR).exists()){
+			new File(CONFIG_DIR).mkdirs();
+		}
+		
 		configs = new Hashtable<String, Config>();
 		
 		// Register core configs
