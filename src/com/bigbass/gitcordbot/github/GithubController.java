@@ -49,24 +49,9 @@ public class GithubController extends Thread {
 	}
 	
 	@Override
-	public void run(){/*
-		Issues issues = github.repos().get(new Coordinates.Simple("bigbass1997", "Gitcord")).issues();
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("state", "all");
-		map.put("since", "2017-10-04T04:35:37Z");
+	public void run(){
+		long startTime = System.currentTimeMillis();
 		
-		System.out.println("=== Initial Response ===");
-		for(Issue issue : issues.iterate(map)){
-			try {
-				for(Comment comment : issue.comments().iterate(new Github.Time("2017-10-04T04:35:37Z").date())){
-					System.out.println(comment.json());
-				}
-			} catch (ParseException | IOException e) {
-				e.printStackTrace();
-			}
-		}*/
-		
-		float startTime = System.currentTimeMillis();
 		while(running){
 			try {
 				sleep(5000);
@@ -74,7 +59,7 @@ public class GithubController extends Thread {
 				e.printStackTrace();
 			}
 			
-			if(System.currentTimeMillis() - startTime > 15000){
+			if(System.currentTimeMillis() - startTime >= 15000){
 				checkUpdates();
 				
 				startTime = System.currentTimeMillis();
