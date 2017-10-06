@@ -2,14 +2,16 @@ package com.bigbass.gitcordbot.discord.commands.github;
 
 import java.io.IOException;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import com.bigbass.gitcordbot.discord.DiscordUtil;
 import com.bigbass.gitcordbot.discord.commands.Command;
 import com.bigbass.gitcordbot.github.GithubController;
 import com.jcabi.github.Branch;
 import com.jcabi.github.Coordinates;
-import com.jcabi.github.Fork;
 import com.jcabi.github.Repo;
 import com.jcabi.github.User;
+import com.jcabi.http.response.JsonResponse;
 
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IMessage;
@@ -59,18 +61,41 @@ public class InfoCommand extends Command {
 		b.withUrl("https://github.com/" + coord.user() + "/" + coord.repo());
 		
 		String nl = "\n";
+		String com = ", ";
 		
 		// Collaborators
 		String collaborators = "";
 		for(User user : repo.collaborators().iterate()){
 			try {
-				collaborators += user.login() + nl;
+				collaborators += user.login() + com;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		if(!collaborators.isEmpty()){
-			b.appendField("Collaborators", collaborators.trim(), true);
+			b.appendField("Collaborators", collaborators.substring(0, collaborators.length() - 2), true);
+		}
+		
+		// Contributors
+		try {
+			JsonArray contributorsJson = repo.github().entry().uri()
+		            .path("/repos")
+		            .path(repo.coordinates().user())
+		            .path(repo.coordinates().repo())
+					.path("/contributors")
+					.back().fetch().as(JsonResponse.class).json().readArray();
+			
+			String contributors = "";
+			for(int i = 0; i < contributorsJson.size(); i++){
+				JsonObject contribJson = contributorsJson.getJsonObject(i);
+				
+				contributors += contribJson.getString("login") + com;
+			}
+			if(!contributors.isEmpty()){
+				b.appendField("Contributors", contributors.substring(0, contributors.length() - 2), true);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 		// Branches
@@ -82,20 +107,11 @@ public class InfoCommand extends Command {
 			b.appendField("Branches", branches.trim(), true);
 		}
 		
-		// Contributors
-		// https://api.github.com/repos/GTNewHorizons/NewHorizons/contributors
-		String contributors = "WIP";
-		
-		if(!contributors.isEmpty()){
-			b.appendField("Contributors", contributors.trim(), true);
-		}
-		
 		// Forks
 		/*String forks = "";
 		for(Fork f : repo.forks().iterate("newest")){
-			Fork.Smart fork = new Fork.Smart(f);
 			try {
-				forks += fork.fullName() + nl;
+				forks += f.json().getString("full_name") + nl;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (AssertionError e){
@@ -106,7 +122,22 @@ public class InfoCommand extends Command {
 			b.appendField("Forks", forks.trim(), true);
 		}*/
 		try {
-			b.appendField("json", repo.json().toString(), false);
+			JsonArray forksJson = repo.github().entry().uri()
+		            .path("/repos")
+		            .path(repo.coordinates().user())
+		            .path(repo.coordinates().repo())
+					.path("/forks")
+					.back().fetch().as(JsonResponse.class).json().readArray();
+			
+			String forks = "";
+			for(int i = 0; i < forksJson.size(); i++){
+				JsonObject forkJson = forksJson.getJsonObject(i);
+				
+				forks += forkJson.getString("full_name") + nl;
+			}
+			if(!forks.isEmpty()){
+				b.appendField("Forks", forks.trim(), true);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
