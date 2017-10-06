@@ -95,14 +95,21 @@ public class InfoCommand extends Command {
 		for(Fork f : repo.forks().iterate("newest")){
 			Fork.Smart fork = new Fork.Smart(f);
 			try {
-				forks += fork.name() + nl;
+				forks += fork.fullName() + nl;
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (AssertionError e){
 				e.printStackTrace();
 			}
 		}
 		if(!forks.isEmpty()){
 			b.appendField("Forks", forks.trim(), true);
 		}*/
+		try {
+			b.appendField("json", repo.json().toString(), false);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return b.build();
 	}
