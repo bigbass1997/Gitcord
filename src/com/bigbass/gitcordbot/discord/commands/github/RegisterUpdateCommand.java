@@ -1,12 +1,15 @@
 package com.bigbass.gitcordbot.discord.commands.github;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.bigbass.gitcordbot.discord.commands.Command;
 import com.bigbass.gitcordbot.github.GithubController;
 import com.bigbass.gitcordbot.github.updates.IssueUpdate;
 import com.bigbass.gitcordbot.github.updates.IssuesUpdate;
 import com.jcabi.github.Coordinates;
+import com.jcabi.github.Issue;
 import com.jcabi.github.Repo;
 
 import sx.blah.discord.handle.obj.IMessage;
@@ -51,9 +54,15 @@ public class RegisterUpdateCommand extends Command {
 				try {
 					GithubController.getInstance().addUpdate(new IssuesUpdate(repo));
 					
+					Map<String, String> map = new HashMap<String, String>();
+					map.put("state", "all");
+					for(Issue issue : repo.issues().iterate(map)){
+						GithubController.getInstance().addUpdate(new IssueUpdate(repo, issue.number()));
+					}
+					
 					msg.getChannel().sendMessage("Update has been added!");
 					return;
-				} catch(NumberFormatException e) {
+				} catch(NumberFormatException | IOException e) {
 					e.printStackTrace();
 				}
 			}

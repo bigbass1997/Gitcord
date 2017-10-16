@@ -17,6 +17,7 @@ public class GithubController extends Thread {
 	private boolean running;
 	
 	private ArrayList<GithubUpdate> updates;
+	private ArrayList<GithubUpdate> queue;
 	
 	public final String USER_AGENT;
 	public final String TOKEN;
@@ -25,6 +26,7 @@ public class GithubController extends Thread {
 	
 	private GithubController(){
 		updates = new ArrayList<GithubUpdate>();
+		queue = new ArrayList<GithubUpdate>();
 		
 		USER_AGENT = ConfigManager.getInstance().getConfig("github").data.getString("useragent");
 		TOKEN = ConfigManager.getInstance().getConfig("github").data.getString("token");
@@ -74,10 +76,15 @@ public class GithubController extends Thread {
 			return;
 		}
 		
-		updates.add(update);
+		queue.add(update);
 	}
 	
 	private void checkUpdates(){
+		if(queue.size() > 0){
+			updates.addAll(queue);
+			queue.clear();
+		}
+		
 		for(GithubUpdate update : updates){
 			update.check(github);
 		}

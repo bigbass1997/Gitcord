@@ -1,16 +1,25 @@
 package com.bigbass.gitcordbot.github.updates;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
+import com.bigbass.gitcordbot.discord.DiscordController;
+import com.bigbass.gitcordbot.discord.DiscordUtil;
+import com.bigbass.gitcordbot.github.GithubController;
 import com.jcabi.github.Event;
 import com.jcabi.github.Github;
 import com.jcabi.github.Issue;
 import com.jcabi.github.Issues;
 import com.jcabi.github.Repo;
+
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.util.EmbedBuilder;
 
 public class IssuesUpdate implements GithubUpdate {
 	
@@ -36,8 +45,29 @@ public class IssuesUpdate implements GithubUpdate {
 			try {
 				String jsonDate = issue.json().getString("created_at");
 				Date createdAt = new Github.Time(jsonDate).date();
+				System.out.println("Issue #" + issue.number() + " createdAt: " + createdAt.getTime() + " | lastCheck: " + lastCheck.date().getTime());
 				if(lastCheck.date().before(createdAt)){
-					System.out.println("Issue #" + issue.number() + " has been created.");
+					if(issue.events().iterator().hasNext()){
+						continue;
+					}
+					
+					JsonObject json = issue.json();
+					
+					EmbedObject embed = formatMessage(
+							json.getString("body"),
+							json.getString("title"),
+							"Issue #" + issue.number() + " Created",
+							issue.repo().coordinates().toString(),
+							json.getString("html_url"),
+							json.getJsonObject("user").getString("login"),
+							json.getJsonObject("user").getString("html_url"),
+							json.getJsonObject("user").getString("avatar_url"),
+							new Color(68, 204, 204)
+						);
+					
+					DiscordController.getInstance().client.getChannelByID(364497546158276613L).sendMessage(embed);
+					
+					GithubController.getInstance().addUpdate(new IssueUpdate(repo, issue.number()));
 				}
 			} catch (ParseException | IOException e) {
 				e.printStackTrace();
@@ -54,5 +84,20 @@ public class IssuesUpdate implements GithubUpdate {
 		}
 
 		lastCheck = new Github.Time(new Date());
+	}
+	
+	private EmbedObject formatMessage(String body, String issueTitle, String title, String repo, String commentURL, String authorLogin, String authorURL, String avatarURL, Color col){
+		EmbedBuilder b = DiscordUtil.getBuilder();
+		b.clearFields().setLenient(true).withColor(col);
+		
+		b.withTitle(title + " - " + repo);
+		b.withUrl(commentURL);
+		b.withAuthorName(authorLogin);
+		b.withAuthorUrl(authorURL);
+		b.withAuthorIcon(avatarURL);
+		
+		b.appendField(issueTitle, body, false);
+		
+		return b.build();
 	}
 }
